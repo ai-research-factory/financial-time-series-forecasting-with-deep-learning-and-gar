@@ -3,4 +3,4 @@ name = "financial-time-series-forecasting-with-deep-learning-and-gar"
 version = "0.1.0"
 description = "Financial Time-series Forecasting with Deep Learning and GARCH models"
 requires-python = ">=3.10"
-dependencies = ["numpy", "pandas", "scikit-learn", "torch", "matplotlib", "tqdm"]
+dependencies = ["numpy", "pandas", "scikit-learn", "torch", "matplotlib", "tqdm", "arch"]

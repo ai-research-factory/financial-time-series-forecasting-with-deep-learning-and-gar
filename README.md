@@ -34,27 +34,41 @@ python3 -m src.main --run-walkforward
 python3 -m src.main --run-walkforward --n-splits 5 --epochs 50 --lookback 60
 ```
 
-Results are saved to `reports/cycle_3/walkforward_metrics.json` and `reports/cycle_3/metrics.json`.
+## Backtest with Trading Strategy
+
+Run the Phase 4 backtest with cost model:
+```bash
+python3 -m src.main --run-backtest
+python3 -m src.main --run-backtest --n-splits 5 --epochs 50 --cost-bps 5
+```
+
+Results are saved to `reports/cycle_4/`.
 
 ## Project Structure
 
 ```
 src/
-  main.py              # CLI entry point (--run-walkforward)
-  backtest.py          # ARF standard backtest framework
+  main.py                # CLI entry point (--run-walkforward, --run-backtest)
+  backtest_framework.py  # ARF standard backtest framework
+  trading_rules.py       # Risk-adjusted entry rules using GARCH volatility
+  backtest/
+    strategy.py          # Signal generation (long/short)
+    engine.py            # P&L computation with cost model
   data/
-    data_loader.py     # BTC-USD data fetching and preprocessing
+    data_loader.py       # BTC-USD data fetching and preprocessing
   models/
-    lstm_garch.py      # LSTM+GARCH hybrid model
+    lstm_garch.py        # LSTM+GARCH hybrid model
   evaluation/
-    validator.py       # Walk-forward evaluator
+    validator.py         # Walk-forward evaluator
+    baselines.py         # Buy & Hold baseline
 scripts/
-  prepare_data.py      # Data preparation entry point
+  prepare_data.py        # Data preparation entry point
 tests/
-  test_data_integrity.py  # Data quality and leakage tests
-  test_backtest.py     # Walk-forward validation tests
+  test_data_integrity.py # Data quality and leakage tests
+  test_backtest.py       # Walk-forward validation tests
+  test_strategy.py       # Strategy, engine, trading rules tests
 reports/
-  cycle_3/             # Current cycle reports
+  cycle_4/               # Current cycle reports
 ```
 
 ## Cycle Progress
@@ -64,6 +78,17 @@ reports/
 | 1 | Core Model (LSTM+GARCH) | Complete |
 | 2 | Real Data Pipeline | Complete |
 | 3 | Walk-Forward Evaluation | Complete |
+| 4 | Trading Strategy & Cost Model | Complete |
+
+## Latest Results (Cycle 4)
+
+From `reports/cycle_4/metrics.json`:
+
+| Strategy | Sharpe (Gross) | Sharpe (Net) | Annual Return | Max Drawdown |
+|---|---|---|---|---|
+| Basic Long/Short | 0.5839 | 0.4641 | 18.17% | -80.68% |
+| Risk-Adjusted | 0.1754 | 0.0521 | -0.20% | -75.36% |
+| Buy & Hold | 0.5969 | — | 18.93% | -88.64% |
 
 ## Reports
 
@@ -71,3 +96,5 @@ Each cycle produces:
 - `reports/cycle_N/metrics.json` — Structured metrics
 - `reports/cycle_N/technical_findings.md` — Technical summary
 - `reports/cycle_N/preflight.md` — Pre-implementation checks
+- `reports/cycle_N/backtest_summary.json` — Detailed backtest results
+- `reports/cycle_N/pnl_curve.png` — Cumulative P&L visualization

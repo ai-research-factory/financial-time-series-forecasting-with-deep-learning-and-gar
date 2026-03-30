@@ -1,0 +1,102 @@
+{
+  "basic_strategy": {
+    "gross": {
+      "sharpeRatio": 0.5839,
+      "annualReturn": 0.1817,
+      "maxDrawdown": -0.7573,
+      "hitRate": 0.504
+    },
+    "net": {
+      "sharpeRatio": 0.4641,
+      "annualReturn": 0.1041,
+      "maxDrawdown": -0.8068,
+      "hitRate": 0.4991
+    },
+    "total_trades": 1881,
+    "total_costs": 0.9405
+  },
+  "risk_adjusted_strategy": {
+    "gross": {
+      "sharpeRatio": 0.1754,
+      "annualReturn": -0.002,
+      "maxDrawdown": -0.6933,
+      "hitRate": 0.2524
+    },
+    "net": {
+      "sharpeRatio": 0.0521,
+      "annualReturn": -0.0456,
+      "maxDrawdown": -0.7536,
+      "hitRate": 0.2504
+    },
+    "total_trades": 1236,
+    "total_costs": 0.618
+  },
+  "buy_and_hold": {
+    "metrics": {
+      "sharpeRatio": 0.5969,
+      "annualReturn": 0.1893,
+      "maxDrawdown": -0.8864,
+      "hitRate": 0.5235
+    },
+    "total_trades": 0
+  },
+  "cost_bps": 5.0,
+  "n_splits": 5,
+  "per_window": [
+    {
+      "window": 1,
+      "train_start": "2016-03-31",
+      "train_end": "2016-09-06",
+      "test_start": "2016-09-08",
+      "test_end": "2018-08-06",
+      "n_train": 160,
+      "n_test": 698,
+      "mse": 0.0020505996336389115,
+      "mae": 0.0023479017447980287
+    },
+    {
+      "window": 2,
+      "train_start": "2016-03-31",
+      "train_end": "2018-08-05",
+      "test_start": "2018-08-07",
+      "test_end": "2020-07-04",
+      "n_train": 858,
+      "n_test": 698,
+      "mse": 0.0016483691827706417,
+      "mae": 0.00213538935425209
+    },
+    {
+      "window": 3,
+      "train_start": "2016-03-31",
+      "train_end": "2020-07-03",
+      "test_start": "2020-07-05",
+      "test_end": "2022-06-02",
+      "n_train": 1556,
+      "n_test": 698,
+      "mse": 0.0014208396173768219,
+      "mae": 0.0016544685256609242
+    },
+    {
+      "window": 4,
+      "train_start": "2016-03-31",
+      "train_end": "2022-06-01",
+      "test_start": "2022-06-03",
+      "test_end": "2024-04-30",
+      "n_train": 2254,
+      "n_test": 698,
+      "mse": 0.0007953815743924934,
+      "mae": 0.001079068148509068
+    },
+    {
+      "window": 5,
+      "train_start": "2016-03-31",
+      "train_end": "2024-04-29",
+      "test_start": "2024-05-01",
+      "test_end": "2026-03-30",
+      "n_train": 2952,
+      "n_test": 698,
+      "mse": 0.0006186342170021325,
+      "mae": 0.000833987119998576
+    }
+  ]
+}

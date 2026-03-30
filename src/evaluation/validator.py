@@ -9,7 +9,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Optional
 
-from src.backtest import WalkForwardValidator, BacktestConfig, BacktestResult, compute_metrics, calculate_costs, generate_metrics_json
+from src.backtest_framework import WalkForwardValidator, BacktestConfig, BacktestResult, compute_metrics, calculate_costs, generate_metrics_json
 from src.models.lstm_garch import LSTMGARCHModel
 from src.data.data_loader import load_btc_data, PROJECT_ROOT
 

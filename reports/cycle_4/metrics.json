@@ -1,0 +1,45 @@
+{
+  "sharpeRatio": 0.1754,
+  "annualReturn": -0.002,
+  "maxDrawdown": -0.6933,
+  "hitRate": 0.2524,
+  "totalTrades": 1236,
+  "transactionCosts": {
+    "feeBps": 10.0,
+    "slippageBps": 5.0,
+    "netSharpe": 0.0521
+  },
+  "walkForward": {
+    "windows": 5,
+    "positiveWindows": 0,
+    "avgOosSharpe": 0.0521
+  },
+  "customMetrics": {
+    "phase": "4-trading-strategy-and-cost-model",
+    "basic_gross_sharpe": 0.5839,
+    "basic_net_sharpe": 0.4641,
+    "basic_gross_return": 0.1817,
+    "basic_net_return": 0.1041,
+    "basic_max_drawdown": -0.8068,
+    "basic_hit_rate": 0.4991,
+    "risk_adjusted_gross_sharpe": 0.1754,
+    "risk_adjusted_net_sharpe": 0.0521,
+    "risk_adjusted_gross_return": -0.002,
+    "risk_adjusted_net_return": -0.0456,
+    "risk_adjusted_max_drawdown": -0.7536,
+    "risk_adjusted_hit_rate": 0.2504,
+    "baseline_buyhold_sharpe": 0.5969,
+    "baseline_buyhold_return": 0.1893,
+    "baseline_buyhold_drawdown": -0.8864,
+    "baseline_buyhold_hit_rate": 0.5235,
+    "baseline_1n_sharpe": 0.5969,
+    "baseline_1n_return": 0.1893,
+    "baseline_1n_drawdown": -0.8864,
+    "strategy_vs_1n_sharpe_diff": -0.5448,
+    "strategy_vs_1n_return_diff": -0.2349,
+    "strategy_vs_1n_drawdown_diff": 0.1328,
+    "cost_bps": 5.0,
+    "vol_lookback": 20,
+    "vol_percentile": 40.0
+  }
+}

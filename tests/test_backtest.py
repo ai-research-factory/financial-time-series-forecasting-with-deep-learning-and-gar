@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.backtest import WalkForwardValidator, BacktestConfig
+from src.backtest_framework import WalkForwardValidator, BacktestConfig
 
 
 class TestWalkForwardSplits:
