@@ -7,7 +7,7 @@ proj_7d1c0d6f
 StatArb, ResidualFactors
 
 ## Current Cycle
-3
+4
 
 ## Objective
 Implement, validate, and iteratively improve the paper's approach with production-quality standards.
@@ -70,7 +70,7 @@ df = df.set_index("timestamp")
 
 ## Preflight チェック（実装開始前に必ず実施）
 
-**Phase の実装コードを書く前に**、以下のチェックを実施し結果を `reports/cycle_3/preflight.md` に保存すること。
+**Phase の実装コードを書く前に**、以下のチェックを実施し結果を `reports/cycle_4/preflight.md` に保存すること。
 
 ### 1. データ境界表
 以下の表を埋めて、未来データ混入がないことを確認:
@@ -106,25 +106,26 @@ df = df.set_index("timestamp")
 
 **preflight.md が作成されるまで、Phase の実装コードに進まないこと。**
 
-## ★ 今回のタスク (Cycle 3)
+## ★ 今回のタスク (Cycle 4)
 
 
-### Phase 3: ウォークフォワード評価フレームワーク [Track ]
+### Phase 4: 取引戦略とコストモデルの実装 [Track ]
 
 **Track**:  (A=論文再現 / B=近傍改善 / C=独自探索)
-**ゴール**: モデルの性能を時系列に沿って頑健に評価するためのウォークフォワード検証を実装する。
+**ゴール**: モデルの予測に基づいて簡単な取引戦略をバックテストし、取引コストを考慮した純パフォーマンスを評価する。
 
 **具体的な作業指示**:
-1. `src/evaluation/validator.py`に`WalkForwardValidator`クラスを実装します。 2. `__init__`で`n_splits=5`, `train_ratio=0.7`などのパラメータを受け取ります。 3. `split(data)`メソッドを実装し、時系列データを5つの訓練/テストセットに分割するジェネレータを返します（expanding window方式）。 4. `src/main.py`を更新し、このバリデータを使用して`LSTMGARCHModel`の訓練と予測をループ実行します。 5. 各分割での予測リターンと実績リターンからMSEを計算し、予測ボラティリティと実績の残差の2乗からMAEを計算します。 6. 全分割の結果を`reports/cycle_3/walkforward_metrics.json`に保存します。
+1. `src/backtest/strategy.py`に`SignalGenerator`クラスを作成します。シグナルは `predicted_return > 0` でロング(1)、`predicted_return < 0` でショート(-1)とします。 2. `src/backtest/engine.py`に`BacktestEngine`クラスを作成します。ウォークフォワードで得られたシグナルとリターンデータを受け取り、ポートフォリオのP&Lを計算します。 3. 取引コストモデルを実装します。`BacktestEngine`に`cost_bps`（例：5bps）をパラメータとして渡し、シグナルが変化するたびにコストをP&Lから差し引きます。 4. 総リターン、シャープレシオ、最大ドローダウンを計算し、Gross（コストなし）とNet（コストあり）の両方の結果を`reports/cycle_4/backtest_summary.json`に出力します。
 
 **期待される出力ファイル**:
-- src/evaluation/validator.py
-- reports/cycle_3/walkforward_metrics.json
+- src/backtest/strategy.py
+- src/backtest/engine.py
+- reports/cycle_4/backtest_summary.json
 
 **受入基準 (これを全て満たすまで完了としない)**:
-- 基準1: `walkforward_metrics.json`に5つの分割それぞれに対するMSEとMAEが記録されている。
-- 基準2: 訓練データとテストデータが時間的に重複していないことがコードで確認できる。
-- 基準3: `src/main.py`に`--run-walkforward`のようなCLI引数を追加し、検証を実行できるようにする。
+- 基準1: `backtest_summary.json`にGrossとNetの両方のシャープレシオが記録されている。
+- 基準2: NetシャープレシオがGrossシャープレシオ以下である。
+- 基準3: バックテストの累積P&Lをプロットする機能を追加し、`reports/cycle_4/pnl_curve.png`として保存する。
 
 
 
@@ -139,7 +140,8 @@ df = df.set_index("timestamp")
 
 
 ## スコア推移
-Cycle 1: 45% → Cycle 2: 55%
+Cycle 1: 45% → Cycle 2: 55% → Cycle 3: 45%
+改善速度: 0.0%/cycle ⚠ 停滞気味 — アプローチの転換を検討
 
 
 
@@ -151,17 +153,17 @@ Cycle 1: 45% → Cycle 2: 55%
 2. [object Object]
 3. [object Object]
 ### マネージャー指示 (次のアクション)
-1. 【最優先】`src/backtest.py`の`WalkForwardValidator`を修正し、`src/models/lstm_garch.py`のモデルを学習・予測するループを実装する。`scripts/run_backtest.py`を作成し、このバックテストを実行可能にする。結果として、各ウォークフォワードウィンドウの予測精度（例: Accuracy, F1-score）が`reports/backtest_summary.json`に保存されるようにする。
-2. 【重要】プロジェクトルートに`preflight.md`を作成する。Cycle 3の目標として「LSTM+GARCHモデルとWalkForwardValidatorの統合」を明記し、完了条件（Done When）と主要タスクリストを記述する。
-3. 【推奨】`tests/test_backtest.py`を作成し、`WalkForwardValidator`がモデルを正しく呼び出し、学習データと検証データが時間的に重複していない（look-ahead biasがない）ことを検証するテストケースを追加する。
+1. 【最優先】`src/trading_rules.py`に、GARCHのボラティリティ予測を活用した新しい取引ルール `RiskAdjustedEntryRule` を実装する。このルールは、LSTMの予測リターンが正であり、かつGARCHの予測ボラティリティが過去20日間のボラティリティの40パーセンタイル未満の場合にのみロングシグナルを生成するロジックとする。`configs/backtest_config.yml` を更新し、この新ルールで評価を実行する。
+2. 【重要】`src/evaluation/baselines.py` を作成し、'Buy & Hold' 戦略を実装する。`run_evaluation.py` を修正し、LSTM+GARCHモデルのパフォーマンスとBuy & Holdのパフォーマンス（Sharpe, MDD, Hit Rate, Calmar Ratio）を並べて比較できるようにし、結果を`technical_findings.md`に出力する。
+3. 【推奨】`technical_findings.md`の分析を更新し、①修正前のルール、②リスク調整後の新ルール(`RiskAdjustedEntryRule`)、③Buy & Holdの3者のパフォーマンス指標を記載した比較表を追加する。特に、新ルールの導入によってヒット率と最大ドローダウンがどう変化したかを重点的に考察する。
 
 
 ## 全体Phase計画 (参考)
 
 ✓ Phase 1: コアモデル実装（LSTM+GARCH） — LSTMで平均を予測し、その残差をGARCHでモデル化するハイブリッドモデルの基本構造を実装する。
 ✓ Phase 2: 実データパイプライン構築 — yfinanceからBTC-USDの日足データを取得し、モデルが使用できる形式に前処理するパイプラインを構築する。
-→ Phase 3: ウォークフォワード評価フレームワーク — モデルの性能を時系列に沿って頑健に評価するためのウォークフォワード検証を実装する。
-  Phase 4: 取引戦略とコストモデルの実装 — モデルの予測に基づいて簡単な取引戦略をバックテストし、取引コストを考慮した純パフォーマンスを評価する。
+✓ Phase 3: ウォークフォワード評価フレームワーク — モデルの性能を時系列に沿って頑健に評価するためのウォークフォワード検証を実装する。
+→ Phase 4: 取引戦略とコストモデルの実装 — モデルの予測に基づいて簡単な取引戦略をバックテストし、取引コストを考慮した純パフォーマンスを評価する。
   Phase 5: ハイパーパラメータ最適化（近傍探索） — 論文で示唆される標準的な値の周辺でLSTMとGARCHのハイパーパラメータを最適化する。
   Phase 6: ロバスト性検証 — ウォークフォワードの分割数を増やし、異なる市場環境でのモデルの安定性を評価する。
   Phase 7: 代替ボラティリティモデルとの比較 — GARCHの有効性を検証するため、より単純なボラティリティモデル（移動標準偏差）との性能を比較する。
@@ -252,9 +254,9 @@ Cycle 1: 45% → Cycle 2: 55%
 
 ## 出力ファイル
 以下のファイルを保存してから完了すること:
-- `reports/cycle_3/preflight.md` — Preflight チェック結果（必須、実装前に作成）
-- `reports/cycle_3/metrics.json` — 下記スキーマに従う（必須）
-- `reports/cycle_3/technical_findings.md` — 実装内容、結果、観察事項
+- `reports/cycle_4/preflight.md` — Preflight チェック結果（必須、実装前に作成）
+- `reports/cycle_4/metrics.json` — 下記スキーマに従う（必須）
+- `reports/cycle_4/technical_findings.md` — 実装内容、結果、観察事項
 
 ### metrics.json 必須スキーマ（Single Source of Truth）
 ```json
