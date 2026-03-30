@@ -7,7 +7,7 @@ proj_7d1c0d6f
 StatArb, ResidualFactors
 
 ## Current Cycle
-2
+3
 
 ## Objective
 Implement, validate, and iteratively improve the paper's approach with production-quality standards.
@@ -70,7 +70,7 @@ df = df.set_index("timestamp")
 
 ## Preflight チェック（実装開始前に必ず実施）
 
-**Phase の実装コードを書く前に**、以下のチェックを実施し結果を `reports/cycle_2/preflight.md` に保存すること。
+**Phase の実装コードを書く前に**、以下のチェックを実施し結果を `reports/cycle_3/preflight.md` に保存すること。
 
 ### 1. データ境界表
 以下の表を埋めて、未来データ混入がないことを確認:
@@ -106,26 +106,25 @@ df = df.set_index("timestamp")
 
 **preflight.md が作成されるまで、Phase の実装コードに進まないこと。**
 
-## ★ 今回のタスク (Cycle 2)
+## ★ 今回のタスク (Cycle 3)
 
 
-### Phase 2: 実データパイプライン構築 [Track ]
+### Phase 3: ウォークフォワード評価フレームワーク [Track ]
 
 **Track**:  (A=論文再現 / B=近傍改善 / C=独自探索)
-**ゴール**: yfinanceからBTC-USDの日足データを取得し、モデルが使用できる形式に前処理するパイプラインを構築する。
+**ゴール**: モデルの性能を時系列に沿って頑健に評価するためのウォークフォワード検証を実装する。
 
 **具体的な作業指示**:
-1. `src/data/data_loader.py`を作成します。 2. `load_btc_data`関数を実装し、`yfinance.download('BTC-USD', period='10y', interval='1d')`を使用してデータを取得します。 3. 対数リターン `log(Close/Close.shift(1))` を計算し、'returns'列として追加します。 4. 欠損値（NaN）を処理します（例：前方フィルまたは行削除）。 5. 処理済みデータを`data/processed/btc_usd_daily.csv`に保存する機能を実装します。 6. `scripts/prepare_data.py`を作成し、このデータローダーを呼び出してCSVファイルを生成します。
+1. `src/evaluation/validator.py`に`WalkForwardValidator`クラスを実装します。 2. `__init__`で`n_splits=5`, `train_ratio=0.7`などのパラメータを受け取ります。 3. `split(data)`メソッドを実装し、時系列データを5つの訓練/テストセットに分割するジェネレータを返します（expanding window方式）。 4. `src/main.py`を更新し、このバリデータを使用して`LSTMGARCHModel`の訓練と予測をループ実行します。 5. 各分割での予測リターンと実績リターンからMSEを計算し、予測ボラティリティと実績の残差の2乗からMAEを計算します。 6. 全分割の結果を`reports/cycle_3/walkforward_metrics.json`に保存します。
 
 **期待される出力ファイル**:
-- src/data/data_loader.py
-- scripts/prepare_data.py
-- data/processed/btc_usd_daily.csv
+- src/evaluation/validator.py
+- reports/cycle_3/walkforward_metrics.json
 
 **受入基準 (これを全て満たすまで完了としない)**:
-- 基準1: `scripts/prepare_data.py`を実行すると`data/processed/btc_usd_daily.csv`が生成される。
-- 基準2: 生成されたCSVファイルには'Date', 'Close', 'returns'列が含まれている。
-- 基準3: 'returns'列にNaNが含まれていない。
+- 基準1: `walkforward_metrics.json`に5つの分割それぞれに対するMSEとMAEが記録されている。
+- 基準2: 訓練データとテストデータが時間的に重複していないことがコードで確認できる。
+- 基準3: `src/main.py`に`--run-walkforward`のようなCLI引数を追加し、検証を実行できるようにする。
 
 
 
@@ -139,16 +138,29 @@ df = df.set_index("timestamp")
 4. 目標は「論文の手法が動くこと」であり、「論文と同じデータを揃えること」ではない
 
 
+## スコア推移
+Cycle 1: 45% → Cycle 2: 55%
 
 
 
+
+
+## レビューからのフィードバック
+### レビュー改善指示
+1. [object Object]
+2. [object Object]
+3. [object Object]
+### マネージャー指示 (次のアクション)
+1. 【最優先】`src/backtest.py`の`WalkForwardValidator`を修正し、`src/models/lstm_garch.py`のモデルを学習・予測するループを実装する。`scripts/run_backtest.py`を作成し、このバックテストを実行可能にする。結果として、各ウォークフォワードウィンドウの予測精度（例: Accuracy, F1-score）が`reports/backtest_summary.json`に保存されるようにする。
+2. 【重要】プロジェクトルートに`preflight.md`を作成する。Cycle 3の目標として「LSTM+GARCHモデルとWalkForwardValidatorの統合」を明記し、完了条件（Done When）と主要タスクリストを記述する。
+3. 【推奨】`tests/test_backtest.py`を作成し、`WalkForwardValidator`がモデルを正しく呼び出し、学習データと検証データが時間的に重複していない（look-ahead biasがない）ことを検証するテストケースを追加する。
 
 
 ## 全体Phase計画 (参考)
 
 ✓ Phase 1: コアモデル実装（LSTM+GARCH） — LSTMで平均を予測し、その残差をGARCHでモデル化するハイブリッドモデルの基本構造を実装する。
-→ Phase 2: 実データパイプライン構築 — yfinanceからBTC-USDの日足データを取得し、モデルが使用できる形式に前処理するパイプラインを構築する。
-  Phase 3: ウォークフォワード評価フレームワーク — モデルの性能を時系列に沿って頑健に評価するためのウォークフォワード検証を実装する。
+✓ Phase 2: 実データパイプライン構築 — yfinanceからBTC-USDの日足データを取得し、モデルが使用できる形式に前処理するパイプラインを構築する。
+→ Phase 3: ウォークフォワード評価フレームワーク — モデルの性能を時系列に沿って頑健に評価するためのウォークフォワード検証を実装する。
   Phase 4: 取引戦略とコストモデルの実装 — モデルの予測に基づいて簡単な取引戦略をバックテストし、取引コストを考慮した純パフォーマンスを評価する。
   Phase 5: ハイパーパラメータ最適化（近傍探索） — 論文で示唆される標準的な値の周辺でLSTMとGARCHのハイパーパラメータを最適化する。
   Phase 6: ロバスト性検証 — ウォークフォワードの分割数を増やし、異なる市場環境でのモデルの安定性を評価する。
@@ -240,9 +252,9 @@ df = df.set_index("timestamp")
 
 ## 出力ファイル
 以下のファイルを保存してから完了すること:
-- `reports/cycle_2/preflight.md` — Preflight チェック結果（必須、実装前に作成）
-- `reports/cycle_2/metrics.json` — 下記スキーマに従う（必須）
-- `reports/cycle_2/technical_findings.md` — 実装内容、結果、観察事項
+- `reports/cycle_3/preflight.md` — Preflight チェック結果（必須、実装前に作成）
+- `reports/cycle_3/metrics.json` — 下記スキーマに従う（必須）
+- `reports/cycle_3/technical_findings.md` — 実装内容、結果、観察事項
 
 ### metrics.json 必須スキーマ（Single Source of Truth）
 ```json
