@@ -7,7 +7,7 @@ proj_7d1c0d6f
 StatArb, ResidualFactors
 
 ## Current Cycle
-4
+5
 
 ## Objective
 Implement, validate, and iteratively improve the paper's approach with production-quality standards.
@@ -70,7 +70,7 @@ df = df.set_index("timestamp")
 
 ## Preflight チェック（実装開始前に必ず実施）
 
-**Phase の実装コードを書く前に**、以下のチェックを実施し結果を `reports/cycle_4/preflight.md` に保存すること。
+**Phase の実装コードを書く前に**、以下のチェックを実施し結果を `reports/cycle_5/preflight.md` に保存すること。
 
 ### 1. データ境界表
 以下の表を埋めて、未来データ混入がないことを確認:
@@ -106,26 +106,26 @@ df = df.set_index("timestamp")
 
 **preflight.md が作成されるまで、Phase の実装コードに進まないこと。**
 
-## ★ 今回のタスク (Cycle 4)
+## ★ 今回のタスク (Cycle 5)
 
 
-### Phase 4: 取引戦略とコストモデルの実装 [Track ]
+### Phase 5: ハイパーパラメータ最適化（近傍探索） [Track ]
 
 **Track**:  (A=論文再現 / B=近傍改善 / C=独自探索)
-**ゴール**: モデルの予測に基づいて簡単な取引戦略をバックテストし、取引コストを考慮した純パフォーマンスを評価する。
+**ゴール**: 論文で示唆される標準的な値の周辺でLSTMとGARCHのハイパーパラメータを最適化する。
 
 **具体的な作業指示**:
-1. `src/backtest/strategy.py`に`SignalGenerator`クラスを作成します。シグナルは `predicted_return > 0` でロング(1)、`predicted_return < 0` でショート(-1)とします。 2. `src/backtest/engine.py`に`BacktestEngine`クラスを作成します。ウォークフォワードで得られたシグナルとリターンデータを受け取り、ポートフォリオのP&Lを計算します。 3. 取引コストモデルを実装します。`BacktestEngine`に`cost_bps`（例：5bps）をパラメータとして渡し、シグナルが変化するたびにコストをP&Lから差し引きます。 4. 総リターン、シャープレシオ、最大ドローダウンを計算し、Gross（コストなし）とNet（コストあり）の両方の結果を`reports/cycle_4/backtest_summary.json`に出力します。
+1. `scripts/optimize_params.py`を作成します。 2. `optuna`ライブラリを使用し、最適化スタディを作成します。 3. LSTMの探索空間: `n_layers` (1-2), `hidden_units` (16, 32, 64), `dropout` (0.1-0.3)。 4. GARCHの探索空間: `p` (1), `q` (1) は固定とし、分布モデルを `normal` と `t` で試します。 5. 目的関数は、単一の訓練・検証スプリット（全データの最初の80%）におけるNetシャープレシオとします。 6. 最適化の結果（最良パラメータとトライアル履歴）を`reports/cycle_5/optimization_results.json`と`reports/cycle_5/optimization_history.png`に保存します。論文既定値（Phase 1の値）での結果も記録し比較します。
 
 **期待される出力ファイル**:
-- src/backtest/strategy.py
-- src/backtest/engine.py
-- reports/cycle_4/backtest_summary.json
+- scripts/optimize_params.py
+- reports/cycle_5/optimization_results.json
+- reports/cycle_5/optimization_history.png
 
 **受入基準 (これを全て満たすまで完了としない)**:
-- 基準1: `backtest_summary.json`にGrossとNetの両方のシャープレシオが記録されている。
-- 基準2: NetシャープレシオがGrossシャープレシオ以下である。
-- 基準3: バックテストの累積P&Lをプロットする機能を追加し、`reports/cycle_4/pnl_curve.png`として保存する。
+- 基準1: `optimization_results.json`に最良のハイパーパラメータセットと対応するシャープレシオが記録されている。
+- 基準2: Optunaの`plot_optimization_history`による可視化がPNGファイルとして保存されている。
+- 基準3: 探索はテストデータを一切使用せず、訓練・検証データのみで行われる。
 
 
 
@@ -140,8 +140,8 @@ df = df.set_index("timestamp")
 
 
 ## スコア推移
-Cycle 1: 45% → Cycle 2: 55% → Cycle 3: 45%
-改善速度: 0.0%/cycle ⚠ 停滞気味 — アプローチの転換を検討
+Cycle 1: 45% → Cycle 2: 55% → Cycle 3: 45% → Cycle 4: 45%
+改善速度: -5.0%/cycle ⚠ 停滞気味 — アプローチの転換を検討
 
 
 
@@ -153,9 +153,15 @@ Cycle 1: 45% → Cycle 2: 55% → Cycle 3: 45%
 2. [object Object]
 3. [object Object]
 ### マネージャー指示 (次のアクション)
-1. 【最優先】`src/trading_rules.py`に、GARCHのボラティリティ予測を活用した新しい取引ルール `RiskAdjustedEntryRule` を実装する。このルールは、LSTMの予測リターンが正であり、かつGARCHの予測ボラティリティが過去20日間のボラティリティの40パーセンタイル未満の場合にのみロングシグナルを生成するロジックとする。`configs/backtest_config.yml` を更新し、この新ルールで評価を実行する。
-2. 【重要】`src/evaluation/baselines.py` を作成し、'Buy & Hold' 戦略を実装する。`run_evaluation.py` を修正し、LSTM+GARCHモデルのパフォーマンスとBuy & Holdのパフォーマンス（Sharpe, MDD, Hit Rate, Calmar Ratio）を並べて比較できるようにし、結果を`technical_findings.md`に出力する。
-3. 【推奨】`technical_findings.md`の分析を更新し、①修正前のルール、②リスク調整後の新ルール(`RiskAdjustedEntryRule`)、③Buy & Holdの3者のパフォーマンス指標を記載した比較表を追加する。特に、新ルールの導入によってヒット率と最大ドローダウンがどう変化したかを重点的に考察する。
+1. 【REPLAN: ブロッカー修正】
+primaryBlocker: ハードコードされたボラティリティ閾値によるリスク調整戦略の性能劣化
+
+上記のブロッカーを最優先で解決してください。
+
+完了条件: ボラティリティ閾値を10パーセンタイルから90パーセンタイルまで10刻みで変化させた際のSharpe Ratio、累積リターン、最大ドローダウンを記録した感度分析レポート（例: `reports/sensitivity_analysis_vol_threshold.csv`）が生成される。
+2. 【最優先】`src/trading_rules.py`内のハードコードされた`vol_percentile: float = 40.0`を、外部から設定可能なパラメータに変更する。mainスクリプトや設定ファイル（例: `config.yaml`）から値を渡せるようにリファクタリングする。
+3. 【重要】変更したボラティリティ閾値パラメータを用いて感度分析を実施するスクリプト（例: `scripts/run_sensitivity_analysis.py`）を作成する。閾値を10%から90%まで10%刻みで変化させ、各々のバックテスト結果（Sharpe Ratio, 累積リターン, 最大ドローダウン）を`reports/sensitivity_analysis_vol_threshold.csv`に出力する。
+4. 【推奨】`preflight.md`を作成し、プロジェクトのテンプレートに沿って必須項目を埋める。今回のサイクルで得られた知見（ハードコードされたパラメータの問題点、リスク調整戦略の失敗）を明確に記載する。
 
 
 ## 全体Phase計画 (参考)
@@ -163,8 +169,8 @@ Cycle 1: 45% → Cycle 2: 55% → Cycle 3: 45%
 ✓ Phase 1: コアモデル実装（LSTM+GARCH） — LSTMで平均を予測し、その残差をGARCHでモデル化するハイブリッドモデルの基本構造を実装する。
 ✓ Phase 2: 実データパイプライン構築 — yfinanceからBTC-USDの日足データを取得し、モデルが使用できる形式に前処理するパイプラインを構築する。
 ✓ Phase 3: ウォークフォワード評価フレームワーク — モデルの性能を時系列に沿って頑健に評価するためのウォークフォワード検証を実装する。
-→ Phase 4: 取引戦略とコストモデルの実装 — モデルの予測に基づいて簡単な取引戦略をバックテストし、取引コストを考慮した純パフォーマンスを評価する。
-  Phase 5: ハイパーパラメータ最適化（近傍探索） — 論文で示唆される標準的な値の周辺でLSTMとGARCHのハイパーパラメータを最適化する。
+✓ Phase 4: 取引戦略とコストモデルの実装 — モデルの予測に基づいて簡単な取引戦略をバックテストし、取引コストを考慮した純パフォーマンスを評価する。
+→ Phase 5: ハイパーパラメータ最適化（近傍探索） — 論文で示唆される標準的な値の周辺でLSTMとGARCHのハイパーパラメータを最適化する。
   Phase 6: ロバスト性検証 — ウォークフォワードの分割数を増やし、異なる市場環境でのモデルの安定性を評価する。
   Phase 7: 代替ボラティリティモデルとの比較 — GARCHの有効性を検証するため、より単純なボラティリティモデル（移動標準偏差）との性能を比較する。
   Phase 8: 残差分析 — モデルの仮定が満たされているか確認するため、LSTMとGARCHの残差を統計的に分析する。
@@ -254,9 +260,9 @@ Cycle 1: 45% → Cycle 2: 55% → Cycle 3: 45%
 
 ## 出力ファイル
 以下のファイルを保存してから完了すること:
-- `reports/cycle_4/preflight.md` — Preflight チェック結果（必須、実装前に作成）
-- `reports/cycle_4/metrics.json` — 下記スキーマに従う（必須）
-- `reports/cycle_4/technical_findings.md` — 実装内容、結果、観察事項
+- `reports/cycle_5/preflight.md` — Preflight チェック結果（必須、実装前に作成）
+- `reports/cycle_5/metrics.json` — 下記スキーマに従う（必須）
+- `reports/cycle_5/technical_findings.md` — 実装内容、結果、観察事項
 
 ### metrics.json 必須スキーマ（Single Source of Truth）
 ```json
