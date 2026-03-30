@@ -1,0 +1,27 @@
+{
+  "sharpeRatio": 0.0,
+  "annualReturn": 0.0,
+  "maxDrawdown": 0.0,
+  "hitRate": 0.0,
+  "totalTrades": 0,
+  "transactionCosts": {
+    "feeBps": 10,
+    "slippageBps": 5,
+    "netSharpe": 0.0
+  },
+  "walkForward": {
+    "windows": 0,
+    "positiveWindows": 0,
+    "avgOosSharpe": 0.0
+  },
+  "customMetrics": {
+    "phase": "2-data-pipeline",
+    "dataRows": 3651,
+    "dataStartDate": "2016-03-31",
+    "dataEndDate": "2026-03-30",
+    "nanCountReturns": 0,
+    "meanDailyReturn": 0.00139091,
+    "stdDailyReturn": 0.03539780,
+    "note": "Phase 2 is data pipeline only. Strategy metrics will be populated in Phase 3+."
+  }
+}

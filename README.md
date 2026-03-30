@@ -4,7 +4,8 @@
 
 ## Overview
 
-Automated reproduction and validation of the paper above.
+Hybrid LSTM + GARCH(1,1) model for financial time series forecasting. The LSTM captures non-linear patterns in conditional mean (expected returns), while GARCH models volatility clustering in the residuals.
+
 See [CLAUDE.md](CLAUDE.md) for implementation instructions and phase plan.
 
 ## Setup
@@ -18,8 +19,38 @@ pytest tests/
 
 Data is fetched from the ARF Data API at runtime. Do not commit data files.
 
+To prepare the BTC-USD dataset:
+```bash
+python3 scripts/prepare_data.py
+```
+
+This generates `data/processed/btc_usd_daily.csv` with daily log returns.
+
+## Project Structure
+
+```
+src/
+  backtest.py          # ARF standard backtest framework
+  data/
+    data_loader.py     # BTC-USD data fetching and preprocessing
+scripts/
+  prepare_data.py      # Data preparation entry point
+tests/
+  test_data_integrity.py  # Data quality and leakage tests
+reports/
+  cycle_2/             # Current cycle reports
+```
+
+## Cycle Progress
+
+| Cycle | Phase | Status |
+|---|---|---|
+| 1 | Core Model (LSTM+GARCH) | Complete |
+| 2 | Real Data Pipeline | Complete |
+
 ## Reports
 
 Each cycle produces:
 - `reports/cycle_N/metrics.json` — Structured metrics
 - `reports/cycle_N/technical_findings.md` — Technical summary
+- `reports/cycle_N/preflight.md` — Pre-implementation checks
