@@ -26,19 +26,35 @@ python3 scripts/prepare_data.py
 
 This generates `data/processed/btc_usd_daily.csv` with daily log returns.
 
+## Walk-Forward Evaluation
+
+Run the walk-forward evaluation:
+```bash
+python3 -m src.main --run-walkforward
+python3 -m src.main --run-walkforward --n-splits 5 --epochs 50 --lookback 60
+```
+
+Results are saved to `reports/cycle_3/walkforward_metrics.json` and `reports/cycle_3/metrics.json`.
+
 ## Project Structure
 
 ```
 src/
+  main.py              # CLI entry point (--run-walkforward)
   backtest.py          # ARF standard backtest framework
   data/
     data_loader.py     # BTC-USD data fetching and preprocessing
+  models/
+    lstm_garch.py      # LSTM+GARCH hybrid model
+  evaluation/
+    validator.py       # Walk-forward evaluator
 scripts/
   prepare_data.py      # Data preparation entry point
 tests/
   test_data_integrity.py  # Data quality and leakage tests
+  test_backtest.py     # Walk-forward validation tests
 reports/
-  cycle_2/             # Current cycle reports
+  cycle_3/             # Current cycle reports
 ```
 
 ## Cycle Progress
@@ -47,6 +63,7 @@ reports/
 |---|---|---|
 | 1 | Core Model (LSTM+GARCH) | Complete |
 | 2 | Real Data Pipeline | Complete |
+| 3 | Walk-Forward Evaluation | Complete |
 
 ## Reports
 

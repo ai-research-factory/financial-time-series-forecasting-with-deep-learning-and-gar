@@ -1,0 +1,40 @@
+{
+  "sharpeRatio": 0.4828,
+  "annualReturn": 0.2294,
+  "maxDrawdown": -0.7244,
+  "hitRate": 0.355,
+  "totalTrades": 750,
+  "transactionCosts": {
+    "feeBps": 10.0,
+    "slippageBps": 5.0,
+    "netSharpe": 0.4828
+  },
+  "walkForward": {
+    "windows": 5,
+    "positiveWindows": 3,
+    "avgOosSharpe": 0.4828
+  },
+  "customMetrics": {
+    "phase": "3-walkforward-evaluation",
+    "n_splits": 5,
+    "per_split_mse": [
+      0.0020422953039675035,
+      0.0016674937371442954,
+      0.0014777548164161562,
+      0.000773997515241781,
+      0.0006194825029516043
+    ],
+    "per_split_mae": [
+      0.0023322299251855977,
+      0.0021649856216297845,
+      0.0016664755857950977,
+      0.0010777412697822518,
+      0.000827463024005678
+    ],
+    "avg_mse": 0.001316204775144268,
+    "avg_mae": 0.0016137790852796818,
+    "lookback": 60,
+    "lstm_hidden": 50,
+    "lstm_epochs": 50
+  }
+}
